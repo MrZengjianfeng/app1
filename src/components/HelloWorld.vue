@@ -245,6 +245,7 @@
   var top10 = 11;
   var top20 = 21;
 
+  var times = null
 
   export default {
     name: 'HelloWorld',
@@ -258,14 +259,22 @@
         NotShowUpNumber: '07',
         NotShowUpTimes: 0,
         loading: false,
-        isFutureId: null,
-        isFutureTime:null,
+        isFutureTime: null,
+        preDrawTime: null,
       }
     },
     created() {
       var _this = this;
       this.$nextTick(function () {
         _this.requestData();
+        _this.getDoubleStatics();
+        if (times != null) {
+          clearInterval(times);
+        }
+        times = setInterval(() => {
+          _this.GetNowDay();
+        }, 1000);
+
       })
     },
     methods: {
@@ -280,7 +289,6 @@
             _this.resultListData = res.result.data;
             /**整理数据 */
             _this.organizeData(res.result.data);
-            _this.isFutureId = res.result.data[0].preDrawIssue + 1;
             _this.loading = true;
           }
         });
@@ -295,7 +303,6 @@
         _this.countNumberTop10(_this.resultListData);
         _this.countNumberTop20(_this.resultListData);
         _this.NotShowUpFun(_this.resultListData);
-        _this.GetNowDay();
       },
       /**最先出奖的期号，选中的号出现的位数*/
       countNumberAll: function (data) {
@@ -508,24 +515,29 @@
         _this.requestData();
       },
 
-      ajaxRequst: function (issue) {
+      getDoubleStatics: function () {
         var _this = this;
-        _this.$post('/api/home/lottery_code/getLotteryInfo', {
-          "lotCode": 3,
-          "issue": issue
+        _this.$get('/api/home/lottery_code/getDoubleStatics', {
+          'lotCode': 3,
+          'date': ''
         }, {}).then(res => {
-          console.log(res)
-
+          if (res.data.errorCode == 0) {
+            this.preDrawTime = res.data.result.data.drawTime;
+            console.log('this.preDrawTime',this.preDrawTime)
+          }
         });
       },
+
       GetNowDay: function () {
         var _this = this;
         var d = new Date().getTime();
-        console.log(d);
         var b = _this.$formatDate(d);
-        console.log(b)
-
-
+        if (b == _this.preDrawTime) {
+          _this.requestData();
+          _this.getDoubleStatics();
+          console.log('===========')
+        }
+        console.log('===b========', b)
       }
 
     }
