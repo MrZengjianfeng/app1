@@ -245,8 +245,8 @@
   var top10 = 11;
   var top20 = 21;
 
-  var times = null
-
+  var times = null;
+  var timeout = null;
   export default {
     name: 'HelloWorld',
     data() {
@@ -271,6 +271,7 @@
         if (times != null) {
           clearInterval(times);
         }
+
         times = setInterval(() => {
           _this.GetNowDay();
         }, 1000);
@@ -281,6 +282,7 @@
       /**请求数据*/
       requestData() {
         var _this = this;
+        _this.loading = false;
         _this.$postForm('/api/home/lottery_code/getLotteryList', {
           lotCode: 3
         }, {}).then(res => {
@@ -491,7 +493,6 @@
         for (var i = 0; i < data.length - 1; i++) {
           for (var j = 0; j < 10; j++) {
             if (data[i + 1].getResult[j] == _this.CheckNumber) {
-              console.log(data[i].getResult[j] == _this.NotShowUpNumber)
               if (data[i].getResult[j] == _this.NotShowUpNumber) {
                 return;
               } else {
@@ -502,9 +503,9 @@
         }
       },
 
+      /**修改选择的号码和出现*/
       getCouponSelected: function () {
         var _this = this;
-        _this.loading = false;
         _this.NotShowUpTimes = 0;
         reduceNum = 1; //每次减的
         reduceNumTop10 = 1; //前10
@@ -512,9 +513,10 @@
         _this.resultNum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         _this.resultNumTop10 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         _this.resultNumTop20 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        /**请求数据*/
         _this.requestData();
       },
-
+      /**获取下次结果*/
       getDoubleStatics: function () {
         var _this = this;
         _this.$get('/api/home/lottery_code/getDoubleStatics', {
@@ -523,19 +525,20 @@
         }, {}).then(res => {
           if (res.data.errorCode == 0) {
             this.preDrawTime = res.data.result.data.drawTime;
-            console.log('this.preDrawTime',this.preDrawTime)
+            console.log('this.preDrawTime', this.preDrawTime)
           }
         });
       },
-
+      /**获取现在的时间*/
       GetNowDay: function () {
         var _this = this;
         var d = new Date().getTime();
         var b = _this.$formatDate(d);
         if (b == _this.preDrawTime) {
-          _this.requestData();
+          console.log('======_this.preDrawTime=====')
+          _this.getCouponSelected();
           _this.getDoubleStatics();
-          console.log('===========')
+
         }
         console.log('===b========', b)
       }
