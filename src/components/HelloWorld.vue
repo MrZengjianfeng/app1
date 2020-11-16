@@ -261,6 +261,7 @@
         loading: false,
         isFutureTime: null,
         preDrawTime: null,
+        timeOutLoading: null,
       }
     },
     created() {
@@ -271,10 +272,13 @@
         if (times != null) {
           clearInterval(times);
         }
-
         times = setInterval(() => {
           _this.GetNowDay();
         }, 1000);
+
+        if (_this.timeOutLoading != null) {
+          window.clearTimeout(_this.timeOutLoading);
+        }
 
       })
     },
@@ -525,9 +529,24 @@
         }, {}).then(res => {
           if (res.data.errorCode == 0) {
             this.preDrawTime = res.data.result.data.drawTime;
-            console.log('this.preDrawTime', this.preDrawTime)
+            this.compTime(res.data.result.data.drawTime);
+            console.log('this.preDrawTime', this.preDrawTime);
           }
         });
+      },
+      /**比较时间*/
+      compTime: function (date) {
+        var now = new Date;
+        var d = new Date(date);
+        if (now > d) {
+          console.log('之前时间')
+          this.getDoubleStatics();
+        } else if (now < d) {
+          console.log('之后内的日期')
+        } else {
+          console.log('一样的容日期')
+          this.getDoubleStatics();
+        }
       },
       /**获取现在的时间*/
       GetNowDay: function () {
@@ -536,11 +555,26 @@
         var b = _this.$formatDate(d);
         if (b == _this.preDrawTime) {
           console.log('======_this.preDrawTime=====')
-          _this.getCouponSelected();
-          _this.getDoubleStatics();
+
+          /*setTimeout(function()  {
+            _this.getCouponSelected();
+            _this.getDoubleStatics();
+          }, 5000)*/
+
+
+          _this.timeOutLoading = window.setTimeout(() => {
+            console.log('数据请求')
+            _this.getCouponSelected();
+            _this.getDoubleStatics();
+          }, 3000);
+
 
         }
         console.log('===b========', b)
+      },
+      end: function () {
+
+        console.log('数据请求')
       }
 
     }
