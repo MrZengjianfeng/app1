@@ -572,10 +572,6 @@
         }
         console.log('===b========', b)
       },
-      end: function () {
-
-        console.log('数据请求')
-      }
 
     }
   }
